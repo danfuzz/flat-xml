@@ -107,6 +107,10 @@ function fixName {
         echo "Missing run script for: ${name}" 1>&2
     fi
 
+    if [[ ! -r ${dir}/expected.txt ]]; then
+        echo "Missing expected output for: ${name}" 1>&2
+    fi
+
     echo "${dir}"
 }
 
@@ -126,8 +130,9 @@ function runTest {
         cp -r "${dir}" "${testDir}"
         cd "${testDir}"
         chmod 755 run
+        ./run >& output.txt
         # TODO: Stuff goes here!
-        ./run
+        diff -u output.txt expected.txt
     )
 }
 
