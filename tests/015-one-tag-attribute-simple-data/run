@@ -1,0 +1,3 @@
+#!/bin/bash
+
+flat-xml file.xml

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+flat-xml < /dev/null
+flat-xml empty-file.xml
