@@ -26,16 +26,19 @@
 #
 # Known limitations:
 #
-# * Only recognizes double-quoted (not single-quoted) attribute values.
-#
-# * Is overly forgiving about attribute values. (Won't reject ">" in
-#   attributes.)
+# * Is overly forgiving about attribute and data values. (E.g. won't reject
+#   ">" in incorrect places.)
 #
 # * Doesn't handle CDATA at all.
+#
+# * Gets the directive syntax woefully wrong.
 #
 # Unknown limitations:
 #
 # * Probably a bunch.
+#
+# Official XML reference:
+#     <http://www.w3.org/TR/REC-xml/>
 #
 # This utility was inspired by all of:
 #     <http://www.ofb.net/~egnor/xml2/>
@@ -45,6 +48,7 @@
 
 awk '
 BEGIN {
+    SINGLE_QUOTE = sprintf("%c", 39);
     lineCount = 0;
     lineAt = 1;
     colAt = 1;
@@ -161,14 +165,19 @@ function readName(result) {
 }
 
 # readQuotedString(): Reads a quoted string.
-function readQuotedString(result, c) {
-    readString("\"");
-
+function readQuotedString(result, c, delim) {
+    delim = peek();
     result = "";
+
+    if ((delim != "\"") && (delim != SINGLE_QUOTE)) {
+        die("Expected a quote (single or double).");
+    }
+
+    read();
 
     for (;;) {
         c = read();
-        if (c == "\"") {
+        if (c == delim) {
             break;
         }
         result = result c;
@@ -305,22 +314,19 @@ function doAttribute(s, nlAt) {
     pushTag("@" readName());
     emit("{");
 
-    doWhitespace();
-    if (peek() == "=") {
-        read();
-        doWhitespace();
-        s = readQuotedString();
-        for (;;) {
-            nlAt = index(s, "\n");
-            if (nlAt == 0) {
-                break;
-            }
-            emit("+", substr(s, 1, nlAt - 1));
-            s = substr(s, nlAt + 1);
+    readString("=");
+
+    s = readQuotedString();
+    for (;;) {
+        nlAt = index(s, "\n");
+        if (nlAt == 0) {
+            break;
         }
-        if (s != "") {
-            emit("-", s);
-        }
+        emit("+", substr(s, 1, nlAt - 1));
+        s = substr(s, nlAt + 1);
+    }
+    if (s != "") {
+        emit("-", s);
     }
 
     emit("}");
