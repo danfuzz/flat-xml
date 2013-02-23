@@ -1,0 +1,365 @@
+#!/bin/bash
+
+##
+## NOTE: STILL A WORK IN PROGRESS
+##
+
+#
+# A minimal(ish) XML flattener for use with other scripting tools. Given
+# valid XML input, it produces a series of lines of the form `path action`
+# or `path action value`.
+#
+# `path` is the "path" to the element in question, slash separated,
+# with each component indicating an XML container, or at the leaf an
+# attribute (name prefixed by `@`), or at the base an XML directive
+# (name prefixed by `?`).
+#
+# The action may be one of: `{` to indicate a new path is being
+# "opened", `}` to indicate that the current path is being "closed",
+# `+` (with possible value) to indicate newline-terminated data within
+# the current path, and `-` (with possible value) to indicate the end
+# of the current run of data. A data section always takes the form
+# of zero-or-more `+` lines followed by a single `-` line.
+#
+# The output format is meant to be maximally un-ambiguous, if a little
+# verbose.
+#
+# Known limitations:
+#
+# * Only recognizes double-quoted (not single-quoted) attribute values.
+#
+# * Is overly forgiving about attribute values. (Won't reject ">" in
+#   attributes.)
+#
+# * Doesn't handle CDATA at all.
+#
+# Unknown limitations:
+#
+# * Probably a bunch.
+#
+# This utility was inspired by all of:
+#     <http://www.ofb.net/~egnor/xml2/>
+#     <http://awk.info/?doc/tools/xmlparse.html>
+#     <http://www.xml.com/pub/a/2000/03/15/feature/>
+#
+
+awk '
+BEGIN {
+    lineCount = 0;
+    lineAt = 1;
+    colAt = 1;
+    peekBuf = "";
+    tagDepth = 0;
+    tags[0] = "";
+}
+
+# Read in the whole file. Processing is done after reading, by recursive
+# descent.
+{
+    lineCount++;
+    lines[lineCount] = $0 "\n";
+}
+
+END {
+    doFile();
+}
+
+# die(msg): Die with message.
+function die(msg) {
+    printf("%d [%s]: %s\n", lineAt, peek(10), msg) > "/dev/stderr";
+    exit 1;
+}
+
+# pushTag(tag): Pushes a new tag (or attribute, or directive) onto the
+# stack.
+function pushTag(tag) {
+    tags[tagDepth + 1] = tags[tagDepth] "/" tag;
+    tagDepth++;
+}
+
+# popTag(): Pops the topmost tag off the stack.
+function popTag() {
+    tagDepth--;
+}
+
+# emit(action, value): Emits a standard-form line consisting of two or
+# three space-separated fields. Fields are the current path, an
+# "action" identifier, and an optional value.
+function emit(action, value, sep) {
+    sep = "";
+    if (value != "") {
+        sep = " ";
+    }
+    printf("%s %s%s%s\n", tags[tagDepth], action, sep, value);
+}
+
+# peek(len): Peeks at the len count (defaults to 1) of characters
+# starting at the next character ahead.
+function peek(len, l, p) {
+    if (len == 0) {
+        len = 1;
+    }
+
+    while ((length(peekBuf) < len) && (lineAt <= lineCount)) {
+        l = lines[lineAt];
+        p = substr(l, colAt, 1);
+        peekBuf = peekBuf p;
+        colAt++;
+        if (p == "\n") {
+            lineAt++;
+            colAt = 1;
+        }
+    }
+
+    return substr(peekBuf, 1, len);
+}
+
+# eof(): Returns whether or not we are at eof.
+function eof() {
+    return (peek() == "");
+}
+
+# read(len): Reads len (defaults to 1) character(s).
+function read(len, result) {
+    if (len == 0) {
+        len = 1;
+    }
+
+    result = peek(len);
+
+    if (result != "") {
+        peekBuf = substr(peekBuf, len + 1);
+    }
+
+    return result;
+}
+
+# readString(str): Reads length(str) and verifies that it is == str.
+function readString(str, s) {
+    s = read(length(str));
+    if (s != str) {
+        die("Expected \"" str "\". Got \"" s "\".");
+    }
+}
+
+# readName(): Reads a valid name.
+function readName(result) {
+    result = "";
+
+    for (;;) {
+        if (match(peek(), /[-_:a-zA-Z0-9]/) == 0) {
+            break;
+        }
+        result = result read();
+    }
+
+    if (result == "") {
+        die("Expected name.");
+    }
+
+    return result;
+}
+
+# readQuotedString(): Reads a quoted string.
+function readQuotedString(result, c) {
+    readString("\"");
+
+    result = "";
+
+    for (;;) {
+        c = read();
+        if (c == "\"") {
+            break;
+        }
+        result = result c;
+    }
+
+    return result;
+}
+
+# doFile()
+function doFile() {
+    for (;;) {
+        doWhitespace();
+        if (eof()) {
+            break;
+        }
+        doDirectiveOrTag();
+    }
+}
+
+# doWhitespace()
+function doWhitespace(c) {
+    for (;;) {
+        c = peek();
+        if ((c == " ") || (c == "\n") || (c == "\r") || (c == "\t")) {
+            read();
+        } else {
+            break;
+        }
+    }
+}
+
+# doComment()
+function doPossibleComment() {
+    if (peek(4) != "<!--") {
+        return 0;
+    }
+    read(4);
+
+    for (;;) {
+        if (peek(3) == "-->") {
+            read(3);
+            break;
+        }
+        read();
+    }
+
+    return 1;
+}
+
+# doWhitespaceAndComments()
+function doWhitespaceAndComments() {
+    for (;;) {
+        doWhitespace();
+        if (!doPossibleComment()) {
+            break;
+        }
+    }
+}
+
+# doDirectiveOrTag()
+function doDirectiveOrTag(type) {
+    doWhitespaceAndComments();
+
+    if (peek(2) == "<?") {
+        doDirective();
+    } else if (peek() == "<") {
+        doTag();
+    } else {
+        die("Expected tag or directive");
+    }
+}
+
+# doDirective(s)
+function doDirective() {
+    readString("<?");
+
+    doWhitespace();
+
+    pushTag("?" readName());
+    emit("{");
+
+    for (;;) {
+        doWhitespace();
+        if (peek(2) == "?>") {
+            read(2);
+            break;
+        }
+        doAttribute();
+    }
+
+    emit("}");
+    popTag();
+}
+
+# doTag()
+function doTag(s, shortForm, closer, closerLen) {
+    readString("<");
+
+    doWhitespace();
+
+    s = readName();
+    pushTag(s);
+    emit("{");
+
+    shortForm = 0;
+    for (;;) {
+        doWhitespace();
+        if (peek(2) == "/>") {
+            read(2);
+            shortForm = 1;
+            break;
+        } else if (peek() == ">") {
+            read();
+            break;
+        }
+        doAttribute();
+    }
+
+    if (!shortForm) {
+        closer = "</" s ">";
+        closerLen = length(closer);
+        while (peek(closerLen) != closer) {
+            doTagOrData();
+        }
+        readString(closer);
+    }
+
+    emit("}");
+    popTag();
+}
+
+# doAttribute()
+function doAttribute(s, nlAt) {
+    pushTag("@" readName());
+    emit("{");
+
+    doWhitespace();
+    if (peek() == "=") {
+        read();
+        doWhitespace();
+        s = readQuotedString();
+        for (;;) {
+            nlAt = index(s, "\n");
+            if (nlAt == 0) {
+                break;
+            }
+            emit("+", substr(s, 1, nlAt - 1));
+            s = substr(s, nlAt + 1);
+        }
+        if (s != "") {
+            emit("-", s);
+        }
+    }
+
+    emit("}");
+    popTag();
+}
+
+# doTagOrData()
+function doTagOrData() {
+    if (doPossibleComment()) {
+        return;
+    }
+
+    if (peek() == "<") {
+        if (peek(2) == "</") {
+            die("Unexpected close tag.");
+        }
+        doTag();
+    } else {
+        doData();
+    }
+}
+
+# doData()
+function doData(result) {
+    result = "";
+
+    for (;;) {
+        p = peek();
+        if (p == "\n") {
+            emit("+", result);
+            result = "";
+        } else if (p == "<") {
+            break;
+        } else {
+            result = result p;
+        }
+        read();
+    }
+
+    emit("-", result);
+}
+'
