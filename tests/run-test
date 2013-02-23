@@ -1,0 +1,144 @@
+#!/bin/bash
+
+#
+# Runs one or more tests by name.
+#
+
+#
+# Directory detection
+#
+
+# Preserve the original working dir as origDir.
+origDir="${PWD}"
+
+# Set progName to the program name, progDir to its directory, and baseDir
+# to progDir's directory. Follows symlinks.
+prog="$0"
+while [[ -h ${prog} ]]; do
+    [[ "$(/bin/ls -ld "${prog}")" =~ .*' -> '(.*)$ ]]
+    newProg="${BASH_REMATCH[1]}"
+    if [[ ${newProg} =~ ^/ ]]; then
+        prog="${newProg}"
+    else
+        prog="$(dirname "${prog}")/${newProg}"
+    fi
+done
+progName="$(basename "${prog}")"
+progDir="$(dirname "${prog}")"
+cd "${progDir}"
+progDir="${PWD}"
+cd ..
+baseDir="${PWD}"
+cd "${origDir}"
+unset prog
+unset newProg
+
+
+#
+# Argument parsing
+#
+
+# Whether to update/replace the expected output with the actual output.
+# Useful when developing tests.
+updateExpected='no'
+
+while [[ $1 != '' ]]; do
+    opt="$1"
+    if [[ ${opt} == '--' ]]; then
+        shift
+        break
+    elif [[ ${opt} == '--help' ]]; then
+        echo "${progName} [--update] <test-name>"
+        exit
+    elif [[ ${opt} == '--update' ]]; then
+        updateExpected='yes'
+        echo "unknown option: ${opt}" 1>&2
+        exit 1
+    else
+        break
+    fi
+    shift
+done
+unset opt
+
+if [[ $# == 0 ]]; then
+    echo 'Missing test name(s).' 1>&2
+    exit 1
+fi
+
+
+#
+# Temporary directory setup
+#
+
+tmpDir="$(mktemp -d "${TMPDIR:-/tmp/}${progName}-XXXXX")"
+if [[ $? != 0 ]]; then
+    exit 1
+fi
+
+function tmpCleanup {
+    cd /
+    rm -rf "${tmpDir}"
+}
+
+trap 'tmpCleanup' EXIT TERM
+
+
+#
+# Helper functions
+#
+
+# Fixes a test name if necessary, or complains if it can't be fixed.
+function fixName {
+    local name="$1"
+    local -a tests=($(find "${progDir}" -depth 1 -name "${name}"'*'))
+
+    if [[ ${#tests[@]} == 0 ]]; then
+        echo "No matching test found for: ${name}" 1>&2
+        exit 1
+    elif [[ ${#tests[@]} != 1 ]]; then
+        echo "Multiple matching tests found for: ${name}" 1>&2
+        exit 1
+    fi
+
+    local dir="${tests[0]}"
+
+    if [[ ! -r ${dir}/run ]]; then
+        echo "Missing run script for: ${name}" 1>&2
+    fi
+
+    echo "${dir}"
+}
+
+# Runs a single test by directory.
+function runTest {
+    local dir="$1"
+    local testDir="${tmpDir}/test"
+
+    echo ''
+    echo '###'
+    echo "### Running test: $(basename "${dir}")"
+    echo '###'
+
+    (
+        PATH="${baseDir}/bin:${PATH}"
+        rm -rf "${testDir}"
+        cp -r "${dir}" "${testDir}"
+        cd "${testDir}"
+        chmod 755 run
+        # TODO: Stuff goes here!
+        ./run
+    )
+}
+
+#
+# Main script
+#
+
+for name in "$@"; do
+    name="$(fixName "${name}")"
+    if [[ $? != 0 ]]; then
+        exit 1
+    fi
+    runTest "${name}"
+done
