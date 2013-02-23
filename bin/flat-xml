@@ -26,12 +26,21 @@
 #
 # Known limitations:
 #
-# * Is overly forgiving about attribute and data values. (E.g. won't reject
-#   ">" in incorrect places.)
+# * Doesn't limit the `<?xml ... ?>` declaration to have just the valid
+#   attribute names, values, or order.
+#
+# * Doesn't reject processing instructions that look like `<?xml`
+#   declarations.
+#
+# * Only accepts the ASCII-7 subset of valid attribute name characters.
+#
+# * Doesn't properly parse `&` entities in data and attribute values.
 #
 # * Doesn't handle CDATA at all.
 #
-# * Gets the directive syntax woefully wrong.
+# * Doesn't handle directives `<! ... !>` at all.
+#
+# * Gets the processing instruction `<? .... ?>` syntax woefully wrong.
 #
 # Unknown limitations:
 #
@@ -74,8 +83,8 @@ function die(msg) {
     exit 1;
 }
 
-# pushTag(tag): Pushes a new tag (or attribute, or directive) onto the
-# stack.
+# pushTag(tag): Pushes a new tag (or attribute, processing instruction, or
+# directive) onto the stack.
 function pushTag(tag) {
     tags[tagDepth + 1] = tags[tagDepth] "/" tag;
     tagDepth++;
@@ -148,17 +157,17 @@ function readString(str, s) {
 
 # readName(): Reads a valid name.
 function readName(result) {
-    result = "";
+    result = read();
+
+    if (match(result, /[:a-zA-Z0-9]/) == 0) {
+        die("Illegal name start character: \"" result "\"");
+    }
 
     for (;;) {
-        if (match(peek(), /[-_:a-zA-Z0-9]/) == 0) {
+        if (match(peek(), /[-.:a-zA-Z0-9]/) == 0) {
             break;
         }
         result = result read();
-    }
-
-    if (result == "") {
-        die("Expected name.");
     }
 
     return result;
@@ -179,6 +188,8 @@ function readQuotedString(result, c, delim) {
         c = read();
         if (c == delim) {
             break;
+        } else if (c == ">") {
+            die("Invalid placement of \">\" in quoted value.");
         }
         result = result c;
     }
@@ -193,7 +204,7 @@ function doFile() {
         if (eof()) {
             break;
         }
-        doDirectiveOrTag();
+        doTagOrMeta();
     }
 }
 
@@ -237,12 +248,13 @@ function doWhitespaceAndComments() {
     }
 }
 
-# doDirectiveOrTag()
-function doDirectiveOrTag(type) {
+# doTagOrMeta()
+function doTagOrMeta(type) {
     doWhitespaceAndComments();
 
+    # Also would do directives `<!` and CDATA here.
     if (peek(2) == "<?") {
-        doDirective();
+        doProcessingInstruction();
     } else if (peek() == "<") {
         doTag();
     } else {
@@ -250,8 +262,8 @@ function doDirectiveOrTag(type) {
     }
 }
 
-# doDirective(s)
-function doDirective() {
+# doProcessingInstruction(s)
+function doProcessingInstruction() {
     readString("<?");
 
     doWhitespace();
@@ -300,7 +312,7 @@ function doTag(s, shortForm, closer, closerLen) {
         closer = "</" s ">";
         closerLen = length(closer);
         while (peek(closerLen) != closer) {
-            doTagOrData();
+            doTagOrMetaOrData();
         }
         readString(closer);
     }
@@ -333,8 +345,8 @@ function doAttribute(s, nlAt) {
     popTag();
 }
 
-# doTagOrData()
-function doTagOrData() {
+# doTagOrMetaOrData()
+function doTagOrMetaOrData() {
     if (doPossibleComment()) {
         return;
     }
@@ -343,7 +355,7 @@ function doTagOrData() {
         if (peek(2) == "</") {
             die("Unexpected close tag.");
         }
-        doTag();
+        doTagOrMeta();
     } else {
         doData();
     }
@@ -360,6 +372,8 @@ function doData(result) {
             result = "";
         } else if (p == "<") {
             break;
+        } else if (p == ">") {
+            die("Invalid placement of \">\" in data section.");
         } else {
             result = result p;
         }
