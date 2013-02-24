@@ -52,6 +52,7 @@ while [[ $1 != '' ]]; do
         exit
     elif [[ ${opt} == '--update' ]]; then
         updateExpected='yes'
+    elif [[ ${opt} =~ ^- ]]; then
         echo "unknown option: ${opt}" 1>&2
         exit 1
     else
@@ -145,6 +146,10 @@ function runTest {
         kill -9 "${procId}"
     elif cmp expected.txt actual.txt >& /dev/null; then
         return 0
+    elif [[ ${updateExpected} == 'yes' ]]; then
+        echo ''
+        echo 'Updating expected output.'
+        cp actual.txt "${dir}/expected.txt"
     else
         echo ''
         echo 'ERROR: Expected and actual output differ!'
