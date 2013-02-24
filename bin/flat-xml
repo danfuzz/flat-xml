@@ -385,7 +385,9 @@ function doFlatten {
     function doAttribute(s, nlAt) {
         pushTag("@" readName());
         emit("{");
+        doWhitespace();
         readString("=");
+        doWhitespace();
 
         s = readQuotedString();
         for (;;) {
