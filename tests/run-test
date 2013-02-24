@@ -5,7 +5,7 @@
 #
 
 #
-# Directory detection
+# Directory and program name detection
 #
 
 # Preserve the original working dir as origDir.
@@ -42,14 +42,19 @@ unset newProg
 # Useful when developing tests.
 updateExpected='no'
 
+# Whether to print the raw output to the console.
+printOutput='no'
+
 while [[ $1 != '' ]]; do
     opt="$1"
     if [[ ${opt} == '--' ]]; then
         shift
         break
     elif [[ ${opt} == '--help' ]]; then
-        echo "${progName} [--update] <test-name>"
+        echo "${progName} [--update] [--print] <test-name> [<test-name> ...]"
         exit
+    elif [[ ${opt} == '--print' ]]; then
+        printOutput='yes'
     elif [[ ${opt} == '--update' ]]; then
         updateExpected='yes'
     elif [[ ${opt} =~ ^- ]]; then
@@ -122,6 +127,7 @@ function runTest {
     local testDir="${tmpDir}/test"
 
     echo ''
+    echo '############################################################'
     echo '###'
     echo "### Running test: ${name}"
     echo '###'
@@ -131,7 +137,7 @@ function runTest {
     cd "${testDir}"
     chmod 755 run
 
-    PATH="${baseDir}/bin:${PATH}" ./run >& actual.txt &
+    ./run >& actual.txt &
     local procId="$!"
     local i
     for (( i = 25; i > 0; i-- )); do
@@ -140,10 +146,18 @@ function runTest {
         fi
     done
 
+    if [[ ${printOutput} == 'yes' ]]; then
+        echo ''
+        echo '### test output'
+        cat actual.txt
+        echo '###'
+    fi
+
     if [[ ${i} == 0 ]]; then
         echo ''
         echo 'ERROR: Test hung!'
         kill -9 "${procId}"
+        return 1
     elif cmp expected.txt actual.txt >& /dev/null; then
         return 0
     elif [[ ${updateExpected} == 'yes' ]]; then
@@ -155,18 +169,20 @@ function runTest {
         echo ''
         echo 'ERROR: Expected and actual output differ!'
         echo ''
-        echo '########## diff -u expected.txt actual.txt'
+        echo '### diff -u expected.txt actual.txt'
         diff -u expected.txt actual.txt
-        echo '##########'
+        echo '###'
+        return 1
     fi
-
-    errors[${#errors[@]}]="${name}"
 }
 
 
 #
 # Main script
 #
+
+# This makes the tools to be tested be part of the path.
+PATH="${baseDir}/bin:${PATH}"
 
 declare -a errors
 
@@ -176,6 +192,9 @@ for name in "$@"; do
         exit 1
     fi
     runTest "${name}"
+    if [[ $? != 0 ]]; then
+        errors[${#errors[@]}]="$(basename "${name}")"
+    fi
 done
 
 errorCount="${#errors[@]}"
