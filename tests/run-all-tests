@@ -40,6 +40,5 @@ unset newProg
 
 cd "${progDir}"
 
-for name in [0-9]*; do
-    ./run-test "${name}"
-done
+tests=($(/bin/ls -d [0-9]*))
+./run-test "${tests[@]}"

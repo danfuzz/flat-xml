@@ -117,28 +117,52 @@ function fixName {
 # Runs a single test by directory.
 function runTest {
     local dir="$1"
+    local name="$(basename "${dir}")"
     local testDir="${tmpDir}/test"
 
     echo ''
     echo '###'
-    echo "### Running test: $(basename "${dir}")"
+    echo "### Running test: ${name}"
     echo '###'
 
-    (
-        PATH="${baseDir}/bin:${PATH}"
-        rm -rf "${testDir}"
-        cp -r "${dir}" "${testDir}"
-        cd "${testDir}"
-        chmod 755 run
-        ./run >& output.txt
-        # TODO: Stuff goes here!
-        diff -u output.txt expected.txt
-    )
+    rm -rf "${testDir}"
+    cp -r "${dir}" "${testDir}"
+    cd "${testDir}"
+    chmod 755 run
+
+    PATH="${baseDir}/bin:${PATH}" ./run >& actual.txt &
+    local procId="$!"
+    local i
+    for (( i = 25; i > 0; i-- )); do
+        if ! ps -p "${procId}" >& /dev/null; then
+            break
+        fi
+    done
+
+    if [[ ${i} == 0 ]]; then
+        echo ''
+        echo 'ERROR: Test hung!'
+        kill -9 "${procId}"
+    elif cmp expected.txt actual.txt >& /dev/null; then
+        return 0
+    else
+        echo ''
+        echo 'ERROR: Expected and actual output differ!'
+        echo ''
+        echo '########## diff -u expected.txt actual.txt'
+        diff -u expected.txt actual.txt
+        echo '##########'
+    fi
+
+    errors[${#errors[@]}]="${name}"
 }
+
 
 #
 # Main script
 #
+
+declare -a errors
 
 for name in "$@"; do
     name="$(fixName "${name}")"
@@ -147,3 +171,17 @@ for name in "$@"; do
     fi
     runTest "${name}"
 done
+
+errorCount="${#errors[@]}"
+if [[ ${errorCount} == '0' ]]; then
+    exit
+fi
+
+echo ''
+echo 'The following tests failed:'
+
+for (( i = 0; i < errorCount; i++ )); do
+    echo "    ${errors[${i}]}"
+done
+
+exit 1
