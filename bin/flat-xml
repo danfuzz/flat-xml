@@ -262,7 +262,7 @@ function doFlatten {
     # doFile()
     function doFile() {
         for (;;) {
-            doWhitespace();
+            doWhitespaceAndComments();
             if (eof()) {
                 break;
             }
