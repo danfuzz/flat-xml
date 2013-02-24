@@ -150,7 +150,13 @@ function runTest {
         echo ''
         echo '### test output'
         cat actual.txt
-        echo '###'
+
+        if [[ "$(tail -c 1 actual.txt)" != '' ]]; then
+            echo
+            echo '### (no newline at end)'
+        else
+            echo '###'
+        fi
     fi
 
     if [[ ${i} == 0 ]]; then
