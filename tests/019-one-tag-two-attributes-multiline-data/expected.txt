@@ -1,1 +1,10 @@
-TODO
+/muffin {
+/muffin/@type {
+/muffin/@type - bran
+/muffin/@type }
+/muffin/@variant {
+/muffin/@variant - healthy
+/muffin/@variant }
+/muffin + Contains 200% of the USRDA of bran.
+/muffin - Also contains twigs.
+/muffin }

@@ -1,1 +1,8 @@
-TODO
+/muffin {
+/muffin/@type {
+/muffin/@type - blueberry
+/muffin/@type }
+/muffin/@variant {
+/muffin/@variant - vegan
+/muffin/@variant }
+/muffin }

@@ -1,1 +1,6 @@
-TODO
+/igram {
+/igram/@color {
+/igram/@color - purple
+/igram/@color }
+/igram - invisible
+/igram }

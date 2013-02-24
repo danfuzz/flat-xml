@@ -1,1 +1,8 @@
-TODO
+/colors {
+/colors/@list {
+/colors/@list + red
+/colors/@list + green
+/colors/@list + blue
+/colors/@list - purple
+/colors/@list }
+/colors }

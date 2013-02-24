@@ -1,1 +1,13 @@
-TODO
+/stuff {
+/stuff/@amount {
+/stuff/@amount - lots
+/stuff/@amount }
+/stuff/@type {
+/stuff/@type - carbon
+/stuff/@type }
+/stuff/@reason {
+/stuff/@reason + just
+/stuff/@reason + because
+/stuff/@reason -
+/stuff/@reason }
+/stuff }

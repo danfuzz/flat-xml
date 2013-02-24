@@ -1,1 +1,5 @@
-TODO
+/blort {
+/blort/@personality {
+/blort/@personality - spaz
+/blort/@personality }
+/blort }
