@@ -1,0 +1,9 @@
+/statement {
+/statement + WHYA
+/statement + REYO
+/statement + UREA
+/statement + DING
+/statement + THIS
+/statement + ?
+/statement -
+/statement }
