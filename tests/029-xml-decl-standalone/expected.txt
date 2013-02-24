@@ -1,0 +1,10 @@
+/?xml {
+/?xml/@version {
+/?xml/@version - 1.0
+/?xml/@version }
+/?xml/@standalone {
+/?xml/@standalone - yes
+/?xml/@standalone }
+/?xml }
+/stuff {
+/stuff }

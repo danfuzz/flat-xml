@@ -1,0 +1,13 @@
+/?xml {
+/?xml/@version {
+/?xml/@version - 1.0
+/?xml/@version }
+/?xml/@encoding {
+/?xml/@encoding - UTF-8
+/?xml/@encoding }
+/?xml/@standalone {
+/?xml/@standalone - no
+/?xml/@standalone }
+/?xml }
+/stuff {
+/stuff }

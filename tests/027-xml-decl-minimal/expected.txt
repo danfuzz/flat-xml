@@ -1,0 +1,7 @@
+/?xml {
+/?xml/@version {
+/?xml/@version - 1.0
+/?xml/@version }
+/?xml }
+/stuff {
+/stuff }
