@@ -150,6 +150,7 @@ function runTest {
         echo ''
         echo 'Updating expected output.'
         cp actual.txt "${dir}/expected.txt"
+        return 0
     else
         echo ''
         echo 'ERROR: Expected and actual output differ!'
