@@ -350,8 +350,6 @@ function doFlatten {
     function doTag(s, shortForm, closer, closerLen) {
         readString("<");
 
-        doWhitespace();
-
         s = readName();
         pushTag(s);
         emit("{");
