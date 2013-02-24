@@ -1,0 +1,35 @@
+/?xml {
+/?xml/@version {
+/?xml/@version - 1.0
+/?xml/@version }
+/?xml }
+/cat {
+/cat +
+/cat -
+/cat/variety {
+/cat/variety - Nebelung
+/cat/variety }
+/cat +
+/cat -
+/cat/name {
+/cat/name/first {
+/cat/name/first - Francis
+/cat/name/first }
+/cat/name/middle {
+/cat/name/middle - Greyscale
+/cat/name/middle }
+/cat/name/last {
+/cat/name/last - Lux
+/cat/name/last }
+/cat/name }
+/cat +
+/cat -
+/cat/origin {
+/cat/origin/@type {
+/cat/origin/@type - informal
+/cat/origin/@type }
+/cat/origin - San Francisco SPCA
+/cat/origin }
+/cat +
+/cat -
+/cat }
