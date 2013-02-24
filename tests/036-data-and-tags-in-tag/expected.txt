@@ -1,0 +1,9 @@
+/thing {
+/thing - here
+/thing/stuff {
+/thing/stuff }
+/thing - there
+/thing/stuff {
+/thing/stuff }
+/thing - elsewhere
+/thing }

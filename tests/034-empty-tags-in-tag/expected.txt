@@ -1,0 +1,6 @@
+/thing {
+/thing/stuff {
+/thing/stuff }
+/thing/other-stuff {
+/thing/other-stuff }
+/thing }
