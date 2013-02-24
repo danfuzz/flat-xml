@@ -142,7 +142,7 @@ Known Limitations
 
 * Doesn't handle directives `<! ... !>` at all.
 
-* Gets the processing instruction `<? .... ?>` syntax woefully wrong.
+* Gets the processing instruction `<? ... ?>` syntax woefully wrong.
 
 
 Unknown Limitations
