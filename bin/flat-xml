@@ -1,59 +1,11 @@
 #!/bin/bash
-
-##
-## NOTE: STILL A WORK IN PROGRESS
-##
+#
+# Copyright 2013 Dan Bornstein, <danfuzz@milk.com>.
 
 #
-# A minimal(ish) XML flattener for use with other scripting tools. Given
-# valid XML input, it produces a series of lines of the form `path action`
-# or `path action value`.
+# A minimal(ish) XML flattener for use with other scripting tools.
 #
-# `path` is the "path" to the element in question, slash separated,
-# with each component indicating an XML container, or at the leaf an
-# attribute (name prefixed by `@`), or at the base an XML directive
-# (name prefixed by `?`).
-#
-# The action may be one of: `{` to indicate a new path is being
-# "opened", `}` to indicate that the current path is being "closed",
-# `+` (with possible value) to indicate newline-terminated data within
-# the current path, and `-` (with possible value) to indicate the end
-# of the current run of data. A data section always takes the form
-# of zero-or-more `+` lines followed by a single `-` line.
-#
-# The output format is meant to be maximally un-ambiguous, if a little
-# verbose.
-#
-# Known limitations:
-#
-# * Doesn't limit the `<?xml ... ?>` declaration to have just the valid
-#   attribute names, values, or order.
-#
-# * Doesn't reject processing instructions that look like `<?xml`
-#   declarations.
-#
-# * Only accepts the ASCII-7 subset of valid attribute name characters.
-#
-# * Doesn't properly parse `&` entities in data and attribute values.
-#
-# * Doesn't handle CDATA at all.
-#
-# * Doesn't handle directives `<! ... !>` at all.
-#
-# * Gets the processing instruction `<? .... ?>` syntax woefully wrong.
-#
-# Unknown limitations:
-#
-# * Probably a bunch.
-#
-# Official XML reference:
-#     <http://www.w3.org/TR/REC-xml/>
-#
-# This utility was inspired by all of:
-#     <http://www.ofb.net/~egnor/xml2/>
-#     <http://awk.info/?doc/tools/xmlparse.html>
-#     <http://www.xml.com/pub/a/2000/03/15/feature/>
-#
+
 
 #
 # Directory and program name detection
