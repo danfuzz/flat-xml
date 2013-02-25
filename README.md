@@ -1,6 +1,12 @@
 Flat-XML
 ========
 
+Because the world can never have too many incomplete implementations
+of XML parsing.
+
+Introduction
+------------
+
 The `flat-xml` utility script is an XML "flattener" which takes
 XML input and produces a flattened form that is much easier for
 other shell scripts to digest. The output is meant to be maximally
@@ -63,10 +69,13 @@ leniency.
 
 Note that any *known* leniency is documented (under "Known
 Limitations," below), and that for the most part such leniency exists
-because the author is unaware of practical problems with it. That
-said, the author is happy to accept patches which improve strictness
-without sacrificing the readability, understandability, and
-performance (such as it is) of the code.
+because the author is unaware of practical problems with it.
+
+All that said, the author is happy to accept patches which improve
+coverage of syntax and/or strictness of parsing, as long as such
+patches sacrifice neither the performance (such as it is), nor
+readability, nor maintainability of the code. See below for
+information on contributing.
 
 
 Options
@@ -155,10 +164,17 @@ Contributing
 ------------
 
 Bug reports and patches gladly accepted at
-<https://github.com/danfuzz/flat-xml>.  Please be maximally specific
-with your bug reports. The gold standard is a report with an
-executable demonstration of the problem. Please also note what OS and
-version you are running. Thanks!
+<https://github.com/danfuzz/flat-xml>.
+
+Please be maximally specific with your bug reports. In particular,
+please note what OS and version you are running. In addition, the
+specific versions of the `bash` and `awk` tools may come in handy.
+
+The gold standard for a bug report includes a pull request which
+adds a test that demonstrates the problem. The platinum standard
+includes a PR with both a test and a fix.
+
+Thanks!
 
 
 Author and License
