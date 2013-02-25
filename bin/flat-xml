@@ -291,7 +291,7 @@ function doFlatten {
         }
     }
 
-    # doProcessingInstruction(s)
+    # doProcessingInstruction()
     function doProcessingInstruction() {
         readString("<?");
 
