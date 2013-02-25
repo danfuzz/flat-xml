@@ -85,6 +85,10 @@ Options
 
 Emits a short help message and exits.
 
+### --version
+
+Emits version and copyright information, and exits.
+
 
 Output
 ------
