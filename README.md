@@ -37,22 +37,6 @@ Installation
 Copy the file `bin/flat-xml` anywhere convenient.
 
 
-Testing
--------
-
-From your console prompt:
-
-```shell
-./tests/run-all-tests
-```
-
-If you are working on a single test, use `./tests/run-test
-<test-number>`. For ease of debugging and new test development, the
-`run-test` command also takes the options `--print` to print the
-actual output of the test to the console, and `--update` to rewrite
-the expected output to match the actual output.
-
-
 Usage
 -----
 
@@ -141,7 +125,8 @@ The third field is the data associated with a `+` or `-` action, if any.
 The output is produced in the same order that elements appear in the
 original XML document.
 
-See [the examples directory](examples/) or the tests for more details.
+See [the examples directory](examples/) or [the tests](tests/)
+for more details.
 
 
 Known Limitations
