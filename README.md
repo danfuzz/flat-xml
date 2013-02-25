@@ -46,6 +46,12 @@ From your console prompt:
 ./tests/run-all-tests
 ```
 
+If you are working on a single test, use `./tests/run-test
+<test-number>`. For ease of debugging and new test development, the
+`run-test` command also takes the options `--print` to print the
+actual output of the test to the console, and `--update` to rewrite
+the expected output to match the actual output.
+
 
 Usage
 -----
