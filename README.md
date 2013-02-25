@@ -151,7 +151,7 @@ Known Limitations
 * Doesn't attempt to honor a character encoding declaration, if present.
 
 * Only handles UTF-8 (the assumed default character encoding) as well
-  as the underlying system's awk implementation.
+  as the underlying system's awk implementation does.
 
 
 Unknown Limitations
