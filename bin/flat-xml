@@ -65,7 +65,7 @@ while [[ $1 != '' ]]; do
         echo "${progUrl}"
         exit
     elif [[ ${opt} =~ ^- ]]; then
-        echo "unknown option: ${opt}" 1>&2
+        echo "Unknown option: ${opt}" 1>&2
         exit 1
     else
         break
