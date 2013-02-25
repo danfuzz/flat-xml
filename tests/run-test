@@ -205,6 +205,10 @@ done
 
 errorCount="${#errors[@]}"
 if [[ ${errorCount} == '0' ]]; then
+    if [[ $# != 1 ]]; then
+        echo ''
+        echo 'Huzzah! All tests passed!'
+    fi
     exit
 fi
 
