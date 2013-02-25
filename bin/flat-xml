@@ -86,7 +86,7 @@ function doFlatten {
     awk '
 
     BEGIN {
-        SINGLE_QUOTE = sprintf("%c", 39);
+        SINGLE_QUOTE = "\x27";
         lineCount = 0;
         lineAt = 1;
         colAt = 1;
