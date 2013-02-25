@@ -164,6 +164,12 @@ Unknown Limitations
 * Probably a lot.
 
 
+Contributing
+------------
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+
 Author and License
 ------------------
 
