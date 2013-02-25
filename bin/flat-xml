@@ -5,15 +5,15 @@
 # <http://www.apache.org/licenses/LICENSE-2.0>
 #
 
-progVersion='0.2.0'
-progCopyright='Copyright 2013 Dan Bornstein, <danfuzz@milk.com>.'
-progUrl='<https://github.com/danfuzz/flat-xml>'
-
 #
 # A minimal(ish) XML flattener for use with other scripting tools.
 #
 # See <https://github.com/danfuzz/flat-xml> for more details.
 #
+
+progVersion='0.2.0'
+progCopyright='Copyright 2013 Dan Bornstein, <danfuzz@milk.com>.'
+progUrl='<https://github.com/danfuzz/flat-xml>'
 
 
 #
