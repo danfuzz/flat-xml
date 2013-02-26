@@ -122,7 +122,7 @@ The second field is an "action," one of:
 
 The third field is the data associated with a `+` or `-` action, if any.
 The data is output with entities translated, so if the XML is `blort
-&amp;amp; fizmo` the output value will be `blort &amp; fizmo`.
+&amp; fizmo` the output value will be `blort & fizmo`.
 
 The output is produced in the same order that elements appear in the
 original XML document.
