@@ -142,8 +142,8 @@ Known Limitations
 
 * Only accepts the ASCII-7 subset of valid attribute name characters.
 
-* Only recognizes the five standard predefined entities: &amp;amp;
-  &amp;apos; &amp;gt; &amp;lt; &amp;quot;
+* Only recognizes the five standard predefined entities: `&amp;`
+  `&apos;` `&gt;` `&lt;` `&quot;`
 
 * Doesn't handle CDATA at all.
 
