@@ -11,7 +11,7 @@
 # See <https://github.com/danfuzz/flat-xml> for more details.
 #
 
-progVersion='0.2.1'
+progVersion='0.2.2'
 progCopyright='Copyright 2013 Dan Bornstein, <danfuzz@milk.com>.'
 progUrl='<https://github.com/danfuzz/flat-xml>'
 
@@ -87,6 +87,12 @@ function doFlatten {
 
     BEGIN {
         SINGLE_QUOTE = "\x27";
+        ENTITIES["amp"] = "&";
+        ENTITIES["apos"] = SINGLE_QUOTE;
+        ENTITIES["gt"] = ">";
+        ENTITIES["lt"] = "<";
+        ENTITIES["quot"] = "\"";
+
         lineCount = 0;
         lineAt = 1;
         colAt = 1;
@@ -213,6 +219,27 @@ function doFlatten {
         return result;
     }
 
+    # readEntity(): Reads an entity. Assumes "&" has already been read.
+    # Returns the converted string.
+    function readEntity(name, c) {
+        name = "";
+        for (;;) {
+            c = read();
+            if (c == ";") {
+                break;
+            } else if (c == "") {
+                die("EOF in the middle of entity.");
+            }
+            name = name c;
+        }
+
+        if (name in ENTITIES) {
+            return ENTITIES[name];
+        }
+
+        die("Unknown entity: \"" name "\"");
+    }
+
     # readQuotedString(): Reads a quoted string.
     function readQuotedString(result, c, delim) {
         delim = peek();
@@ -228,8 +255,12 @@ function doFlatten {
             c = read();
             if (c == delim) {
                 break;
+            } else if (c == "&") {
+                c = readEntity();
             } else if (c == ">") {
                 die("Invalid placement of \">\" in quoted value.");
+            } else if (c == "") {
+                die("EOF in the middle of quoted string.");
             }
             result = result c;
         }
@@ -395,12 +426,17 @@ function doFlatten {
             p = peek();
             if (p == "<") {
                 break;
+            } else if (p == "&") {
+                read();
+                result = result readEntity();
             } else if (p == ">") {
                 die("Invalid placement of \">\" in data section.");
+            } else if (p == "") {
+                die("EOF in the middle of data section.");
             } else {
                 result = result p;
+                read();
             }
-            read();
         }
 
         emit("-", result);

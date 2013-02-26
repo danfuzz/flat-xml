@@ -121,6 +121,8 @@ The second field is an "action," one of:
   is data at all, it will be terminated by a possibly-empty `-` line.
 
 The third field is the data associated with a `+` or `-` action, if any.
+The data is output with entities translated, so if the XML is `blort
+&amp;amp; fizmo` the output value will be `blort &amp; fizmo`.
 
 The output is produced in the same order that elements appear in the
 original XML document.
@@ -140,7 +142,8 @@ Known Limitations
 
 * Only accepts the ASCII-7 subset of valid attribute name characters.
 
-* Doesn't properly parse `&` entities in data and attribute values.
+* Only recognizes the five standard predefined entities: &amp;amp;
+  &amp;apos; &amp;gt; &amp;lt; &amp;quot;
 
 * Doesn't handle CDATA at all.
 
