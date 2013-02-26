@@ -140,10 +140,14 @@ Known Limitations
 * Doesn't reject processing instructions that look like `<?xml`
   declarations.
 
+* Doesn't complain if `--` appears inside a comment.
+
 * Only accepts the ASCII-7 subset of valid attribute name characters.
 
 * Only recognizes the five standard predefined entities: `&amp;`
   `&apos;` `&gt;` `&lt;` `&quot;`
+
+* Doesn't recognize character references `&#...;` or `&#x...;`.
 
 * Doesn't handle CDATA at all.
 
