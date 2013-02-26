@@ -21,9 +21,9 @@ baseline "standardish POSIX" tools (with the Bash shell considered
 This program was inspired by several others that fill similar niches
 in the ecosystem, namely:
 
-* <http://www.ofb.net/~egnor/xml2/>
-* <http://awk.info/?doc/tools/xmlparse.html>
-* <http://www.xml.com/pub/a/2000/03/15/feature/>
+* xml2 &mdash; <http://www.ofb.net/~egnor/xml2/>
+* xmlparse.awk &mdash; <http://awk.info/?doc/tools/xmlparse.html>
+* Pyxie &mdash; <http://www.xml.com/pub/a/2000/03/15/feature/>
 
 And many details for this program were derived from the official
 XML specification at:
