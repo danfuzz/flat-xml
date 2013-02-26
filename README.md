@@ -151,7 +151,9 @@ Known Limitations
 * Doesn't attempt to honor a character encoding declaration, if present.
 
 * Only handles UTF-8 (the assumed default character encoding) as well
-  as the underlying system's awk implementation does.
+  as the underlying system's awk implementation does. Recent versions
+  of Gnu Awk (`gawk`) seem to do a reasonable job at this. Other versions
+  do not.
 
 
 Unknown Limitations
