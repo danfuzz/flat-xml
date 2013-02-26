@@ -11,7 +11,7 @@
 # See <https://github.com/danfuzz/flat-xml> for more details.
 #
 
-progVersion='0.2.0'
+progVersion='0.2.1'
 progCopyright='Copyright 2013 Dan Bornstein, <danfuzz@milk.com>.'
 progUrl='<https://github.com/danfuzz/flat-xml>'
 
@@ -124,15 +124,26 @@ function doFlatten {
         tagDepth--;
     }
 
-    # emit(action, value): Emits a standard-form line consisting of two or
-    # three space-separated fields. Fields are the current path, an
-    # "action" identifier, and an optional value.
-    function emit(action, value, sep) {
-        sep = "";
-        if (value != "") {
-            sep = " ";
+    # emit(action, value): Emits a (sequence of) standard-form line(s)
+    # consisting of two or three space-separated fields. Fields are
+    # the current path, an "action" identifier, and an optional
+    # value. If the value is non-empty and contains any newlines, then
+    # this emits one more line than there are newlines, with all but
+    # the last using an action of "+" instead of the specified action.
+    function emit(action, value, lines, count, i) {
+        if (value == "") {
+            printf("%s %s\n", tags[tagDepth], action);
+            return;
         }
-        printf("%s %s%s%s\n", tags[tagDepth], action, sep, value);
+
+        count = split(value, lines, /\n/);
+        for (i = 1; i <= count; i++) {
+            printf("%s %s%s%s\n",
+                tags[tagDepth],
+                (i == count) ? action : "+",
+                (lines[i] == "") ? "" : " ",
+                lines[i]);
+        }
     }
 
     # peek(len): Peeks at the len count (defaults to 1) of characters
@@ -349,24 +360,13 @@ function doFlatten {
     }
 
     # doAttribute()
-    function doAttribute(s, nlAt) {
+    function doAttribute() {
         pushTag("@" readName());
         emit("{");
         doWhitespace();
         readString("=");
         doWhitespace();
-
-        s = readQuotedString();
-        for (;;) {
-            nlAt = index(s, "\n");
-            if (nlAt == 0) {
-                break;
-            }
-            emit("+", substr(s, 1, nlAt - 1));
-            s = substr(s, nlAt + 1);
-        }
-
-        emit("-", s);
+        emit("-", readQuotedString());
         emit("}");
         popTag();
     }
@@ -393,10 +393,7 @@ function doFlatten {
 
         for (;;) {
             p = peek();
-            if (p == "\n") {
-                emit("+", result);
-                result = "";
-            } else if (p == "<") {
+            if (p == "<") {
                 break;
             } else if (p == ">") {
                 die("Invalid placement of \">\" in data section.");
