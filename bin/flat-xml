@@ -11,7 +11,7 @@
 # See <https://github.com/danfuzz/flat-xml> for more details.
 #
 
-progVersion='0.2.2'
+progVersion='0.2.3'
 progCopyright='Copyright 2013 Dan Bornstein, <danfuzz@milk.com>.'
 progUrl='<https://github.com/danfuzz/flat-xml>'
 
@@ -50,6 +50,9 @@ unset newProg
 # Argument parsing
 #
 
+# Whether to use bash-compatible quoting for values.
+quoteValues='no'
+
 while [[ $1 != '' ]]; do
     opt="$1"
     if [[ ${opt} == '--' ]]; then
@@ -64,6 +67,8 @@ while [[ $1 != '' ]]; do
         echo "${progCopyright}"
         echo "${progUrl}"
         exit
+    elif [[ ${opt} == '--quote' ]]; then
+        quoteValues='yes'
     elif [[ ${opt} =~ ^- ]]; then
         echo "Unknown option: ${opt}" 1>&2
         exit 1
@@ -83,7 +88,7 @@ unset opt
 function doFlatten {
     local file="$1"
 
-    awk '
+    awk -v quoteValues="${quoteValues}" '
 
     BEGIN {
         SINGLE_QUOTE = "\x27";
@@ -92,6 +97,23 @@ function doFlatten {
         ENTITIES["gt"] = ">";
         ENTITIES["lt"] = "<";
         ENTITIES["quot"] = "\"";
+
+        if (quoteValues == "yes") {
+            for (i = 0; i <= 255; i++) {
+                c = sprintf("%c", i);
+                if (c == "\n") {
+                    QUOTE[c] = "\\n";
+                } else if (c == "\\") {
+                    QUOTE[c] = "\\\\";
+                } else if (c == "\x27") {
+                    QUOTE[c] = "\\\x27";
+                } else if ((i <= 32) || (i >= 127)) {
+                    QUOTE[c] = sprintf("\\x%02x", i);
+                } else {
+                    QUOTE[c] = c;
+                }
+            }
+        }
 
         lineCount = 0;
         lineAt = 1;
@@ -130,6 +152,25 @@ function doFlatten {
         tagDepth--;
     }
 
+    # shellEscape(value): Performs conservative bash-compatible
+    # escaping on the given value. This keeps all printables as-is
+    # other than space, single quote and backslash, translates newline
+    # in the expected way, and translates all other character
+    # sequences as backslash hex forms. Note: Space is converted
+    # exactly in order to make the resulting string be a single "word"
+    # from the perspective of the usual script tools (such as bash and
+    # awk).
+    function shellEscape(value, arr, i, result) {
+        result = "$\x27";
+
+        split(value, arr, "");
+        for (i = 1; i <= length(arr); i++) {
+            result = result QUOTE[arr[i]];
+        }
+
+        return result "\x27";
+    }
+
     # emit(action, value): Emits a (sequence of) standard-form line(s)
     # consisting of two or three space-separated fields. Fields are
     # the current path, an "action" identifier, and an optional
@@ -142,13 +183,17 @@ function doFlatten {
             return;
         }
 
-        count = split(value, lines, /\n/);
-        for (i = 1; i <= count; i++) {
-            printf("%s %s%s%s\n",
-                tags[tagDepth],
-                (i == count) ? action : "+",
-                (lines[i] == "") ? "" : " ",
-                lines[i]);
+        if (quoteValues == "yes") {
+            printf("%s %s %s\n", tags[tagDepth], action, shellEscape(value));
+        } else {
+            count = split(value, lines, /\n/);
+            for (i = 1; i <= count; i++) {
+                printf("%s %s%s%s\n",
+                    tags[tagDepth],
+                    (i == count) ? action : "+",
+                    (lines[i] == "") ? "" : " ",
+                    lines[i]);
+            }
         }
     }
 

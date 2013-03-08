@@ -79,6 +79,28 @@ Emits a short help message and exits.
 
 Emits version and copyright information, and exits.
 
+### --quote
+
+Tells the tool to emit each attribute and data value as a single line,
+using Bash-compatible shell quoting *and* guaranteeing that the values
+have no internal spaces. The no-space guarantee is to make it trivial
+to pull out values as "words" using the usual shell tools, such as
+Bash and Awk.
+
+More specifically:
+
+* The printed value is surrounded by `$'...'`.
+
+* Single quote is printed as `\'`.
+
+* Backslash is printed as `\\`.
+
+* Space is printed as `\x20`.
+
+* Other ASCII printable characters through as-is.
+
+* All other characters are printed as backslashed hex escapes (`\xNN`).
+
 
 Output
 ------
@@ -114,15 +136,19 @@ The second field is an "action," one of:
 
 * `+` &mdash; indicates newline-terminated content / data at the given
   path. This is either data directly under a tag or quoted content
-  inside an attribute value.
+  inside an attribute value. Note: If the `--quote` option is used,
+  no `+` lines will ever be printed.
 
-* `-` &mdash; indicates the end of content / data at the given
-  path, the value of which is *not* newline-terminated. Any time there
-  is data at all, it will be terminated by a possibly-empty `-` line.
+* `-` &mdash; indicates the end of content / data at the given path,
+  the value of which is *not* implicitly newline-terminated. Any time
+  there is data at all, it will be terminated by a possibly-empty `-`
+  line.
 
 The third field is the data associated with a `+` or `-` action, if any.
 The data is output with entities translated, so if the XML is `blort
-&amp; fizmo` the output value will be `blort & fizmo`.
+&amp; fizmo` the output value will be `blort & fizmo`. If the `--quote`
+option is used, the value will be in the form of a Bash-`eval`-able
+`$'...'` string (about which see `--quote` above for more info).
 
 The output is produced in the same order that elements appear in the
 original XML document.
@@ -158,7 +184,7 @@ Known Limitations
 * Doesn't attempt to honor a character encoding declaration, if present.
 
 * Only handles UTF-8 (the assumed default character encoding) as well
-  as the underlying system's awk implementation does. Recent versions
+  as the underlying system's Awk implementation does. Recent versions
   of Gnu Awk (`gawk`) seem to do a reasonable job at this. Other versions
   do not.
 
