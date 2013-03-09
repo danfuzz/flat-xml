@@ -1,0 +1,28 @@
+/favorites {
+/favorites - $'\n'
+/favorites/flavor {
+/favorites/flavor/@of {
+/favorites/flavor/@of - $'ice\x20cream'
+/favorites/flavor/@of }
+/favorites/flavor - $'coffee'
+/favorites/flavor }
+/favorites - $'\n'
+/favorites/species {
+/favorites/species/@of {
+/favorites/species/@of - $'mammal\nmarsupial'
+/favorites/species/@of }
+/favorites/species - $'wallaby'
+/favorites/species }
+/favorites - $'\n'
+/favorites/arbitrary-text-rectangle {
+/favorites/arbitrary-text-rectangle - $'WHYA\nREYO\nUREA\nDING\nTHIS'
+/favorites/arbitrary-text-rectangle }
+/favorites - $'\n'
+/favorites/escapes {
+/favorites/escapes/@style {
+/favorites/escapes/@style - $'\x20ANSI\x20C\x20'
+/favorites/escapes/@style }
+/favorites/escapes - $'\'\x20\\\x09'
+/favorites/escapes }
+/favorites - $'\n'
+/favorites }
