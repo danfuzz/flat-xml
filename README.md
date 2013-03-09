@@ -18,6 +18,8 @@ requiring neither any compilation nor anything preinstalled beyond
 baseline "standardish POSIX" tools (with the Bash shell considered
 "standardish" enough).
 
+See [the examples directory](examples/) for a couple demos.
+
 This program was inspired by several others that fill similar niches
 in the ecosystem, namely:
 

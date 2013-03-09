@@ -50,7 +50,7 @@ $ flat-xml greyscale.xml
 ```
 
 Note that `flat-xml` does not ignore any whitespace, which is what the
-multiple `+`-then-`-` lines are all about.
+multiple `+`-then-`-` lines (above) are all about.
 
 ```xml
 <!-- One of my favorites. -->
@@ -72,4 +72,26 @@ $ flat-xml peanut.xml
 /poem +
 /poem -     -- Ogden Nash
 /poem }
+```
+
+```shell
+$ flat-xml --quote peanut.xml
+/poem {
+/poem - $'A\x20peanut\x20sat\x20upon\x20a\x20track.\nIts\x20heart\x20was\x20all\x20a-flutter.\nA\x20train\x20came\x20speeding\x20down\x20that\x20track.\nToot!\x20Toot!\x20Peanut\x20butter.\n\n\x20\x20\x20\x20--\x20Ogden\x20Nash'
+/poem }
+```
+
+The `--quote` version isn't the prettiest thing in the world; that's
+not the point. The point is that we can do stuff like this. (Imagine
+that `/poem` is a deeper-nested path within some more complicated
+document.):
+
+```shell
+$ eval echo $(flat-xml --quote peanut.xml | awk '$1 == "/poem" && $2 == '-' { print $3 }')
+A peanut sat upon a track.
+Its heart was all a-flutter.
+A train came speeding down that track.
+Toot! Toot! Peanut butter.
+
+    -- Ogden Nash
 ```
