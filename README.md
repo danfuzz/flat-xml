@@ -95,9 +95,11 @@ More specifically:
 
 * Backslash is printed as `\\`.
 
+* Newline is printed as `\n`.
+
 * Space is printed as `\x20`.
 
-* Other ASCII printable characters print as-is.
+* Other ASCII printable characters are printed as-is.
 
 * All other characters are printed as backslashed hex escapes (`\xNN`).
 
