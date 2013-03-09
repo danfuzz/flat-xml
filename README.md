@@ -97,7 +97,7 @@ More specifically:
 
 * Space is printed as `\x20`.
 
-* Other ASCII printable characters through as-is.
+* Other ASCII printable characters print as-is.
 
 * All other characters are printed as backslashed hex escapes (`\xNN`).
 
