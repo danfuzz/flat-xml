@@ -32,7 +32,7 @@ prompt:
 If you are working on a single test, use:
 
 ```shell
-./tests/run-test<test-number>
+./tests/run-test <test-number>
 ```
 
 For ease of debugging and new test development, the `run-test` command
